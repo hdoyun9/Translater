@@ -1,0 +1,106 @@
+[
+  {
+    "file": "PySide6_Essentials-6.8.3-cp39-abi3-win_amd64.whl",
+    "sha256": "3c0fae5550aff69f2166f46476c36e0ef56ce73d84829eac4559770b0c034b07"
+  },
+  {
+    "file": "ctranslate2-4.6.0-cp311-cp311-win_amd64.whl",
+    "sha256": "865649cebae240fe8c5b3e868354ea6c611d2ec17f335848caf890fca6c62d71"
+  },
+  {
+    "file": "mss-10.0.0-py3-none-any.whl",
+    "sha256": "82cf6460a53d09e79b7b6d871163c982e6c7e9649c426e7b7591b74956d5cb64"
+  },
+  {
+    "file": "numpy-2.2.6-cp311-cp311-win_amd64.whl",
+    "sha256": "e8213002e427c69c45a52bbd94163084025f533a55a59d6f9c5b820774ef3303"
+  },
+  {
+    "file": "pillow-11.3.0-cp311-cp311-win_amd64.whl",
+    "sha256": "1a992e86b0dd7aeb1f053cd506508c0999d710a8f07b4c791c63843fc6a807ac"
+  },
+  {
+    "file": "pyyaml-6.0.3-cp311-cp311-win_amd64.whl",
+    "sha256": "9f3bfb4965eb874431221a3ff3fdcddc7e74e3b07799e0e84ca4a0f867d449bf"
+  },
+  {
+    "file": "sentencepiece-0.2.1-cp311-cp311-win_amd64.whl",
+    "sha256": "82d9ead6591015f009cb1be1cb1c015d5e6f04046dbb8c9588b931e869a29728"
+  },
+  {
+    "file": "setuptools-80.9.0-py3-none-any.whl",
+    "sha256": "062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922"
+  },
+  {
+    "file": "shiboken6-6.8.3-cp39-abi3-win_amd64.whl",
+    "sha256": "bca3a94513ce9242f7d4bbdca902072a1631888e0aa3a8711a52cc5dbe93588f"
+  },
+  {
+    "file": "typing_extensions-4.16.0-py3-none-any.whl",
+    "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+  },
+  {
+    "file": "winrt_runtime-3.2.1-cp311-cp311-win_amd64.whl",
+    "sha256": "c0a9046ae416808420a358c51705af8ae100acd40bc578be57ddfdd51cbb0f9c"
+  },
+  {
+    "file": "winrt_windows_foundation-3.2.1-cp311-cp311-win_amd64.whl",
+    "sha256": "f3762be2f6e0f2aedf83a0742fd727290b397ffe3463d963d29211e4ebb53a7e"
+  },
+  {
+    "file": "winrt_windows_foundation_collections-3.2.1-cp311-cp311-win_amd64.whl",
+    "sha256": "c646a5d442dd6540ade50890081ca118b41f073356e19032d0a5d7d0d38fbc89"
+  },
+  {
+    "file": "winrt_windows_globalization-3.2.1-cp311-cp311-win_amd64.whl",
+    "sha256": "dbd1bd81bc926efbccc6bc7bc04bf7668d045802f9e07cef821d69b717793f6f"
+  },
+  {
+    "file": "winrt_windows_graphics_imaging-3.2.1-cp311-cp311-win_amd64.whl",
+    "sha256": "fa349bb85d69b75ee05a223e4383eecb74c82df50db9b450d4d3b174f98577a6"
+  },
+  {
+    "file": "winrt_windows_media_ocr-3.2.1-cp311-cp311-win_amd64.whl",
+    "sha256": "e1d44b85875643b4718d1094dbe75cee72b3cecedafe37c3f27b738f53bef96c"
+  },
+  {
+    "file": "winrt_windows_storage_streams-3.2.1-cp311-cp311-win_amd64.whl",
+    "sha256": "b02fa251a7eef6081eca1a5f64ecf349cfd1ac0ac0c5a5a30be52897d060bed5"
+  },
+  {
+    "file": "python-embed.zip",
+    "sha256": "009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b"
+  },
+  {
+    "file": "en_ko.argosmodel",
+    "sha256": "e03d8e65e6d44525ec5808c3409fcf8728c76c2c76925372b6d3dc3278de17fc"
+  },
+  {
+    "file": "models/m2m100/model/model.bin",
+    "sha256": "d6703dd9f920ff896e45c3d97b490761bed5944937b90bbe6a7245f5652542d4",
+    "repository": "jncraton/m2m100_418M-ct2-int8",
+    "revision": "7c1b2620a4e58dacecbd8bf89cfd6da7eb9eb7b0",
+    "license": "MIT"
+  },
+  {
+    "file": "models/m2m100/model/config.json",
+    "sha256": "4244772990e30069563e3ddfb4ad6dc95bdfd2ac3de667ea8858c9b0a8433fa8",
+    "repository": "jncraton/m2m100_418M-ct2-int8",
+    "revision": "7c1b2620a4e58dacecbd8bf89cfd6da7eb9eb7b0",
+    "license": "MIT"
+  },
+  {
+    "file": "models/m2m100/model/shared_vocabulary.json",
+    "sha256": "7eb5d0ff184c6095c7c10f9911c0aea492250abd12854f9c3d787c64b1c6397e",
+    "repository": "jncraton/m2m100_418M-ct2-int8",
+    "revision": "7c1b2620a4e58dacecbd8bf89cfd6da7eb9eb7b0",
+    "license": "MIT"
+  },
+  {
+    "file": "models/m2m100/sentencepiece.model",
+    "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a",
+    "repository": "jncraton/m2m100_418M-ct2-int8",
+    "revision": "7c1b2620a4e58dacecbd8bf89cfd6da7eb9eb7b0",
+    "license": "MIT"
+  }
+]
