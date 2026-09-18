@@ -1,0 +1,16 @@
+# Python caches and downloaded/build dependencies.
+__pycache__/
+*.py[cod]
+**/runtime/
+**/build/
+
+# Portable distributions and local update backups belong outside Git history.
+*.zip
+**/backup-before-*/
+
+# Downloadable model data. Keep metadata, configuration and license notices.
+# Full model binaries are distributed in the portable release ZIP.
+**/models/**/model.bin
+**/models/**/sentencepiece.model
+**/models/**/shared_vocabulary.*
+**/models/**/stanza/
