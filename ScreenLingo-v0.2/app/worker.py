@@ -35,6 +35,10 @@ async def run(source):
         for raw in sys.stdin:
             request=json.loads(raw)
             if request.get('type')!='capture': continue
+            translator.configure(request.get('glossary'),request.get('katakana',True))
+            revision=request.get('revision',0)
+            def frame_emit(data):
+                emit(dict(data,revision=revision))
             started=time.monotonic()
             rect=physical_region(monitor,request.get('region'))
             frame=capture.grab(rect)
@@ -55,15 +59,16 @@ async def run(source):
                     'direction':block['direction'],'readings':block.get('readings',[]),
                     'background':block.get('background',[255,255,255]),
                     'pending':True,'failed':False})
-            signature=[[b['text'],b['box'],b['source'],b['direction']] for b in blocks]
+            signature=[[[b['text'],b['box'],b['source'],b['direction']] for b in blocks],
+                       translator.glossary,translator.katakana]
             if signature==previous_signature and previous_output and not any(x['failed'] for x in previous_output):
                 for current,old in zip(output,previous_output):
                     current.update({key:old[key] for key in ('text','pending','failed','message')})
-                emit({'type':'frame','lines':output,'signature':signature,
+                frame_emit({'type':'frame','lines':output,'signature':signature,
                     'seconds':round(time.monotonic()-started,1),'failed':0})
                 previous_output=output
                 continue
-            emit({'type':'detected','signature':signature,'lines':output})
+            frame_emit({'type':'detected','signature':signature,'lines':output})
             last_progress=0
             for index,block in enumerate(blocks):
                 pieces=[]; errors=[]
@@ -79,10 +84,10 @@ async def run(source):
                 output[index].update(text=' '.join(pieces) or '문자 인식 확인 필요',
                     pending=False,failed=bool(errors),message=' / '.join(dict.fromkeys(errors)))
                 if time.monotonic()-last_progress>.2:
-                    emit({'type':'partial','lines':output,'signature':signature,
+                    frame_emit({'type':'partial','lines':output,'signature':signature,
                           'completed':index+1,'total':len(output),'seconds':round(time.monotonic()-started,1)})
                     last_progress=time.monotonic()
-            emit({'type':'frame','lines':output,'signature':signature,
+            frame_emit({'type':'frame','lines':output,'signature':signature,
                   'seconds':round(time.monotonic()-started,1),'failed':sum(x['failed'] for x in output)})
             previous_signature=signature; previous_output=output
 

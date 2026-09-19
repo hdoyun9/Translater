@@ -4,6 +4,7 @@ import re
 from models import find_model
 from core import MemoryCache, normalize
 from text_layout import sentence_units
+from terms import clean_glossary, translate_terms
 
 
 def split_for_model(text, tokenizer, limit=192):
@@ -28,6 +29,14 @@ class Translator:
         self.loaded = {}
         self.cache = MemoryCache(500)
         self.direct = find_model('m2m100') is not None
+        self.glossary={}
+        self.katakana=True
+        self.term_cache=MemoryCache(500)
+
+    def configure(self,glossary=None,katakana=True):
+        glossary=clean_glossary(glossary)
+        if self.glossary!=glossary or self.katakana!=katakana:
+            self.glossary=glossary; self.katakana=bool(katakana); self.term_cache.clear()
 
     def _pair(self, text, pair, source=None):
         if pair not in self.loaded:
@@ -71,6 +80,16 @@ class Translator:
         return ' '.join(infer(chunk) for chunk in chunks).strip()
 
     def translate(self, text, source):
+        text=normalize(text)
+        if source=='keep': return text
+        key=(source,text)
+        result=self.term_cache.get(key)
+        if result is None:
+            result=translate_terms(text,source,self._translate_raw,self.glossary,self.katakana)
+            self.term_cache.put(key,result)
+        return result
+
+    def _translate_raw(self, text, source):
         text=normalize(text)
         if source=='keep': return text
         key = (source, text)

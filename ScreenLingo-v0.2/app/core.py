@@ -1,6 +1,7 @@
 """Pure, testable helpers. No capture, network or third-party imports."""
 from collections import OrderedDict
 import re
+import unicodedata
 
 
 def source_for(text, preferred="en"):
@@ -18,7 +19,13 @@ def source_for(text, preferred="en"):
 
 
 def normalize(text):
+    # Half-width kana and combining dakuten must share the same glossary keys.
+    text=unicodedata.normalize('NFC',re.sub(r'[\uff61-\uff9f]+',
+        lambda match:unicodedata.normalize('NFKC',match[0]),text))
     text = " ".join(text.split())
+    # Windows OCR can read the katakana long-vowel stroke as a spaced hyphen
+    # (コ - ヒ - を). Restrict this repair to Japanese letter contexts.
+    text=re.sub(r'(?<=[ァ-ヺ])\s*[-‐‑‒–—―一]\s*(?=[ぁ-ゖァ-ヺ。、！？!?]|$)','ー',text)
     # Windows OCR inserts a space between almost every Japanese/Chinese glyph.
     cjk = r'\u3000-\u30ff\u3400-\u9fff\uff01-\uff60'
     return re.sub(r'(?<=['+cjk+r'])\s+(?=['+cjk+r'])', '', text)

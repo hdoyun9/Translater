@@ -8,10 +8,15 @@ sys.argv.append('--preview')
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QImage,QPainter
 from main import Panel,Overlay
+from glossary_ui import GlossaryDialog
 app=QApplication([])
 panel=Panel()
 app.processEvents()
 panel.grab().save(str(stage/'qa'/'panel.png'))
+panel.capture_frame.grab().save(str(stage/'qa'/'capture-frame.png'))
+dialog=GlossaryDialog({'カタリナ':'카타리나','東京':'도쿄'},panel)
+dialog.show(); app.processEvents()
+dialog.grab().save(str(stage/'qa'/'glossary.png')); dialog.close()
 for mode,orientation in [('ja_horizontal','horizontal'),('ja_vertical','vertical')]:
     frame=json.loads((stage/'qa'/(mode+'-results.json')).read_text(encoding='utf-8'))
     overlay=Overlay(); overlay.resize(820,660); overlay.lines=frame['lines']; overlay.update()

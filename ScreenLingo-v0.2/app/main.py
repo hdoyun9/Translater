@@ -1,4 +1,4 @@
-"""ScreenLingo 0.1 - visible lifetime, no tray, no startup registration."""
+"""ScreenLingo: a visible, resizable capture frame and local translation."""
 import ctypes
 import json
 import os
@@ -9,9 +9,12 @@ import time
 from PySide6.QtCore import Qt, QTimer, QProcess, QRectF, QRect, Signal, QAbstractNativeEventFilter
 from PySide6.QtGui import QColor, QPainter, QFont, QFontMetrics, QPen, QFontDatabase
 from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QComboBox, QSlider, QMessageBox, QFrame, QDialog, QPlainTextEdit, QScrollArea)
+    QLabel, QPushButton, QComboBox, QSlider, QMessageBox, QFrame, QDialog, QPlainTextEdit, QScrollArea, QCheckBox)
 from models import ROOT, DATA, required, find_model, translation_ready
 from overlay_layout import layout_items, TEXT_FLAGS
+from capture_frame import CaptureFrame
+from glossary_ui import GlossaryDialog
+from terms import clean_glossary
 
 PREVIEW = '--preview' in sys.argv
 IS_WINDOWS = sys.platform == 'win32'
@@ -68,6 +71,7 @@ class Overlay(QWidget):
         self.lines = []
         self.font_size = 15
         self.enabled = True
+        self.region = None
         self.show()
         self.excluded = exclude_capture(self)
 
@@ -79,6 +83,9 @@ class Overlay(QWidget):
         if not self.enabled: return
         painter=QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
+        if self.region:
+            x,y,w,h=self.region
+            painter.setClipRect(QRectF(x*self.width(),y*self.height(),w*self.width(),h*self.height()))
         items=layout_items(self.lines,self.width(),self.height(),self.font_size)
         # Opaque masks are painted at EVERY original glyph's position, even if
         # a translation needs a larger box. Moving text never exposes the source.
@@ -96,51 +103,6 @@ class Overlay(QWidget):
             if item['overflow']:
                 text=f"{item['index']+1}번 번역 · 전체 번역 보기"
             painter.drawText(item['rect'].adjusted(3,3,-3,-3),TEXT_FLAGS,text)
-
-
-class RegionPicker(QWidget):
-    selected = Signal(object)
-
-    def __init__(self):
-        super().__init__(None, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setGeometry(QApplication.primaryScreen().geometry())
-        self.setCursor(Qt.CrossCursor)
-        self.anchor = None
-        self.end = None
-
-    def paintEvent(self, event):
-        p = QPainter(self)
-        p.fillRect(self.rect(), QColor(0,0,0,115))
-        p.setPen(QColor('#ffffff'))
-        p.setFont(QFont('Malgun Gothic', 18))
-        p.drawText(35,55,'번역할 영역을 드래그하세요 · Esc 취소')
-        if self.anchor and self.end:
-            p.setPen(QPen(QColor('#73e0bd'), 3))
-            p.drawRect(QRect(self.anchor, self.end).normalized())
-
-    def mousePressEvent(self, event):
-        self.anchor = event.position().toPoint()
-        self.end = self.anchor
-
-    def mouseMoveEvent(self, event):
-        if self.anchor is not None:
-            self.end = event.position().toPoint()
-            self.update()
-
-    def mouseReleaseEvent(self, event):
-        if self.anchor is None:
-            return
-        r = QRect(self.anchor, event.position().toPoint()).normalized().intersected(self.rect())
-        self.hide()
-        self.selected.emit([r.x()/self.width(),r.y()/self.height(),r.width()/self.width(),r.height()/self.height()] if r.width()>20 and r.height()>20 else None)
-        self.deleteLater()
-
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Escape:
-            self.hide()
-            self.selected.emit(None)
-            self.deleteLater()
 
 
 class Hotkeys(QAbstractNativeEventFilter):
@@ -177,7 +139,7 @@ class Panel(QWidget):
     def __init__(self):
         super().__init__()
         initialize_fonts()
-        self.setWindowTitle('ScreenLingo 0.2 · 화면 한국어 번역')
+        self.setWindowTitle('ScreenLingo 0.2 · 번역 범위 창 업데이트')
         self.setMinimumWidth(480)
         self.resize(520,min(820,QApplication.primaryScreen().availableGeometry().height()-60))
         self.setStyleSheet(STYLE)
@@ -190,7 +152,10 @@ class Panel(QWidget):
         self.worker_warning = ''
         self.last_frame = 0
         self.latest_results=[]
-        self.config = {'source':'auto','interval':1200,'font':15,'region':None,'consent':False,'direction':'auto'}
+        self.capture_revision=0
+        self.frame_editing=False
+        self.config = {'source':'auto','interval':1200,'font':15,'region':None,'consent':False,
+                       'direction':'auto','glossary':{},'katakana':True}
         if not PREVIEW:
             try:
                 stored = json.loads((DATA/'settings.json').read_text(encoding='utf-8'))
@@ -210,8 +175,13 @@ class Panel(QWidget):
             self.config['region']=None
         self.config['consent']=self.config['consent'] is True
         if self.config['direction'] not in ('auto','horizontal','vertical'): self.config['direction']='auto'
+        self.config['glossary']=clean_glossary(self.config['glossary'])
+        self.config['katakana']=self.config['katakana'] is not False
         self.results_dialog=None
         self.overlay = Overlay()
+        self.capture_frame=CaptureFrame(self.config['region'])
+        self.config['region']=self.capture_frame.normalized_region()
+        self.overlay.region=self.config['region']
         outer=QVBoxLayout(self); outer.setContentsMargins(0,0,0,0)
         scroll=QScrollArea(self); scroll.setWidgetResizable(True); scroll.setFrameShape(QFrame.NoFrame)
         content=QWidget(); scroll.setWidget(content); outer.addWidget(scroll)
@@ -240,11 +210,15 @@ class Panel(QWidget):
         self.direction.currentIndexChanged.connect(self.change_direction)
         controls.addWidget(self.direction)
         self.label(controls,'일본어 만화는 원문 언어를 일본어 또는 자동으로 선택하세요.','muted').setWordWrap(True)
-        region_row = QHBoxLayout()
-        self.region_button = self.button(region_row,'영역 지정',self.pick_region)
-        self.button(region_row,'화면 전체',self.full_screen)
-        controls.addLayout(region_row)
-        self.region_label = self.label(controls,'선택 영역' if self.config['region'] else '주 모니터 전체','muted')
+        self.label(controls,'초록색 번역 창 안쪽만 읽습니다.\n상단 바를 끌어 이동하고 테두리·모서리를 끌어 크기를 조절하세요.','muted').setWordWrap(True)
+        self.katakana=QCheckBox('가타카나 이름·외래어 표기 일관성 유지')
+        self.katakana.setChecked(self.config['katakana'])
+        self.katakana.toggled.connect(self.change_katakana); controls.addWidget(self.katakana)
+        self.label(controls,'공식 표기나 원하는 이름은 사전에 등록하면 우선 적용됩니다.','muted').setWordWrap(True)
+        terms_row=QHBoxLayout()
+        self.glossary_button=self.button(terms_row,f"이름·외래어 사전 ({len(self.config['glossary'])})",self.edit_glossary)
+        self.button(terms_row,'번역 창 앞으로',self.show_capture_frame)
+        controls.addLayout(terms_row)
         self.font_label = self.label(controls,'번역 글자 크기')
         self.font_slider = QSlider(Qt.Horizontal)
         self.font_slider.setRange(10,28); self.font_slider.setValue(int(self.config['font']))
@@ -271,6 +245,10 @@ class Panel(QWidget):
         privacy.setWordWrap(True)
         self.label(footer_layout,'Ctrl+Alt+F8 일시정지   F9 번역 표시   F10 종료','muted')
         self.timer = QTimer(self); self.timer.timeout.connect(self.request_capture)
+        self.save_timer=QTimer(self); self.save_timer.setSingleShot(True); self.save_timer.timeout.connect(self.save)
+        self.capture_frame.changed.connect(self.frame_changed)
+        self.capture_frame.editing.connect(self.frame_editing_changed)
+        self.capture_frame.close_requested.connect(self.close)
         self.watchdog = QTimer(self); self.watchdog.timeout.connect(self.expire_stale)
         self.watchdog.start(1000)
         self.overlay.font_size = int(self.config['font'])
@@ -278,6 +256,8 @@ class Panel(QWidget):
         QApplication.instance().installNativeEventFilter(self.hotkeys)
         self.show()
         self.excluded = exclude_capture(self)
+        self.capture_frame.show()
+        self.capture_frame.excluded=exclude_capture(self.capture_frame)
         if PREVIEW:
             self.status.setText('● 로컬 번역 준비 완료 · 화면 전송 없음')
         else:
@@ -309,7 +289,7 @@ class Panel(QWidget):
     def autostart(self):
         if not self.config.get('consent'):
             answer = QMessageBox.question(self,'첫 실행 안내',
-                '이 앱이 열려 있는 동안 주 모니터의 글자를 읽어 한국어로 표시합니다.\n\n'
+                '이 앱이 열려 있는 동안 초록색 번역 창 안쪽의 글자만 읽어 한국어로 표시합니다.\n\n'
                 '화면과 글자는 PC 밖으로 전송하지 않고 파일로 저장하지 않습니다.\n'
                 '창을 닫으면 종료되며 자동 실행·트레이 상주는 없습니다.\n'
                 '번역 모델이 없으면 다운로드 전에 별도로 안내합니다.\n\n'
@@ -324,7 +304,7 @@ class Panel(QWidget):
         if PREVIEW or self.downloader or self.running: return
         if not self.config.get('consent'):
             self.autostart(); return
-        if not self.excluded or not self.overlay.excluded:
+        if not self.excluded or not self.overlay.excluded or not self.capture_frame.excluded:
             self.status.setText('번역창 캡처 제외 기능을 사용할 수 없어 시작하지 않았습니다. Windows 10 2004 이상이 필요합니다.'); return
         source = self.language.currentData()
         if not translation_ready('en' if source=='auto' else source):
@@ -385,10 +365,17 @@ class Panel(QWidget):
             if process is not self.worker and process is not self.downloader:
                 continue
             kind = data.get('type')
+            if kind in ('detected','partial','frame') and data.get('revision',0)!=self.capture_revision:
+                # A frame already being translated can finish after a resize.
+                # Never paint its obsolete coordinates onto the new region.
+                if kind=='frame':
+                    self.busy=False
+                    QTimer.singleShot(0,self.request_capture)
+                continue
             if kind == 'ready' and self.running:
                 self.worker_warning = (' · OCR 미설치: '+', '.join(data['missing'])) if data.get('missing') else ''
                 if data.get('missing_models'): self.worker_warning += ' · 모델 미설치: '+', '.join(data['missing_models'])
-                self.status.setText('● 번역 중 · 주 모니터를 로컬에서 읽습니다.' +
+                self.status.setText('● 번역 중 · 초록색 창 안쪽만 읽습니다.' +
                     ('\n설치되지 않은 OCR 언어: '+', '.join(data['missing']) if data.get('missing') else ''))
                 self.timer.start(self.interval.currentData()); self.request_capture()
             elif kind == 'detected' and self.running:
@@ -421,10 +408,11 @@ class Panel(QWidget):
             self.buffers[process] = buffer
 
     def request_capture(self):
-        if not self.running or self.busy or not self.worker or self.worker.state() != QProcess.Running:
+        if not self.running or self.busy or self.frame_editing or not self.worker or self.worker.state() != QProcess.Running:
             return
         self.busy = True
-        packet = {'type':'capture','region':self.config['region'],'direction':self.config['direction']}
+        packet = {'type':'capture','region':self.config['region'],'direction':self.config['direction'],
+                  'revision':self.capture_revision,'glossary':self.config['glossary'],'katakana':self.config['katakana']}
         self.worker.write((json.dumps(packet)+'\n').encode())
 
     def expire_stale(self):
@@ -492,7 +480,8 @@ class Panel(QWidget):
         if self.results_dialog is None: return
         rows=[]
         for index,line in enumerate(self.latest_results,1):
-            rows.append(f"{index}. {line['text']}"+(f"\n확인: {line['message']}" if line.get('message') else ''))
+            rows.append(f"{index}. {line['text']}"+(f"\n원문: {line['original']}" if line.get('original') else '')+
+                        (f"\n확인: {line['message']}" if line.get('message') else ''))
         scroll=self.results_text.verticalScrollBar().value()
         self.results_text.setPlainText('\n\n'.join(rows) or '아직 인식된 문장이 없습니다.')
         self.results_text.verticalScrollBar().setValue(scroll)
@@ -503,27 +492,43 @@ class Panel(QWidget):
     def change_interval(self):
         self.config['interval'] = self.interval.currentData(); self.timer.setInterval(self.interval.currentData()); self.save()
 
-    def pick_region(self):
-        self.resume_after_region = self.running; self.stop(); self.hide()
-        self.picker = RegionPicker()
-        self.picker.selected.connect(self.region_selected); self.picker.show()
+    def frame_changed(self,region):
+        self.config['region']=region
+        self.overlay.region=region
+        self.capture_revision+=1
+        self.overlay.clear()
+        self.save_timer.start(350)
 
-    def region_selected(self, region):
-        self.show()
-        if region:
-            self.config['region'] = region; self.region_label.setText('지정한 영역만 번역'); self.save()
-        if self.resume_after_region: self.start()
+    def frame_editing_changed(self,editing):
+        self.frame_editing=editing
+        if editing: self.overlay.clear()
+        else: self.request_capture()
 
-    def full_screen(self):
-        was_running = self.running; self.stop()
-        self.config['region'] = None; self.region_label.setText('주 모니터 전체'); self.save()
-        if was_running: self.start()
+    def show_capture_frame(self):
+        self.capture_frame.show(); self.capture_frame.raise_()
+
+    def change_katakana(self,enabled):
+        self.config['katakana']=enabled
+        self.capture_revision+=1; self.overlay.clear(); self.save()
+        self.request_capture()
+
+    def edit_glossary(self):
+        dialog=GlossaryDialog(self.config['glossary'],self)
+        dialog.show()
+        if not exclude_capture(dialog) and self.running: self.stop()
+        if dialog.exec()==QDialog.Accepted:
+            self.config['glossary']=dialog.entries()
+            self.glossary_button.setText(f"이름·외래어 사전 ({len(self.config['glossary'])})")
+            self.capture_revision+=1; self.overlay.clear(); self.save(); self.request_capture()
+        dialog.deleteLater()
 
     def closeEvent(self,event):
         self.stop(); self.watchdog.stop()
+        self.save_timer.stop(); self.save()
         if self.downloader:
             self.downloader.kill(); self.downloader.waitForFinished(1500)
         self.hotkeys.close(); self.overlay.close()
+        self.capture_frame.allow_close=True; self.capture_frame.close()
         event.accept(); QApplication.instance().quit()
 
 

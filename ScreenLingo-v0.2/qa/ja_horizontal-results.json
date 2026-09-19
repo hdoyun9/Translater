@@ -122,6 +122,7 @@
         ]
       ],
       "direction": "horizontal",
+      "readings": [],
       "background": [
         255,
         255,
@@ -134,15 +135,22 @@
   ],
   "signature": [
     [
-      "この扉を開けて、鍵を探してくたさい。",
       [
-        30.0,
-        48.0,
-        299.0,
-        83.0
+        "この扉を開けて、鍵を探してくたさい。",
+        [
+          30.0,
+          48.0,
+          299.0,
+          83.0
+        ],
+        "ja",
+        "horizontal"
       ]
-    ]
+    ],
+    {},
+    true
   ],
-  "seconds": 0.9,
-  "failed": 0
+  "seconds": 1.1,
+  "failed": 0,
+  "revision": 0
 }

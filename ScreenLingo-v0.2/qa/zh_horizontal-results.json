@@ -98,6 +98,7 @@
         ]
       ],
       "direction": "horizontal",
+      "readings": [],
       "background": [
         255,
         255,
@@ -110,15 +111,22 @@
   ],
   "signature": [
     [
-      "请打开这扇门，然后找到钥匙。",
       [
-        21.0,
-        54.0,
-        204.0,
-        92.0
+        "请打开这扇门，然后找到钥匙。",
+        [
+          21.0,
+          54.0,
+          204.0,
+          92.0
+        ],
+        "zh",
+        "horizontal"
       ]
-    ]
+    ],
+    {},
+    true
   ],
-  "seconds": 0.9,
-  "failed": 0
+  "seconds": 0.8,
+  "failed": 0,
+  "revision": 0
 }

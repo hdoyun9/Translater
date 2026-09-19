@@ -4040,6 +4040,7 @@
         ]
       ],
       "direction": "horizontal",
+      "readings": [],
       "background": [
         255,
         255,
@@ -4052,15 +4053,22 @@
   ],
   "signature": [
     [
-      "Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Final sentence: welcome to the game.",
       [
-        21.0,
-        14.0,
-        335.0,
-        2394.0
+        "Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Open the door and find the key. Final sentence: welcome to the game.",
+        [
+          21.0,
+          14.0,
+          335.0,
+          2394.0
+        ],
+        "en",
+        "horizontal"
       ]
-    ]
+    ],
+    {},
+    true
   ],
   "seconds": 1.4,
-  "failed": 0
+  "failed": 0,
+  "revision": 0
 }
